@@ -1,11 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Wallet, TrendingUp, Award, BarChart3, Share2, Shield, ArrowRight, Menu, X, Play, CheckCircle } from 'lucide-react';
 import { WalletConnectButton } from '../components/WalletConnect';
+import { useWalletContext } from '../contexts/WalletContext';
 
 const ModernWeb3Landing = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isConnected } = useWalletContext();
 
   const features = [
     {
@@ -102,9 +105,19 @@ const ModernWeb3Landing = () => {
               and share your unique DeFi journey with the world
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-              <WalletConnectButton className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
-                Get Started <ArrowRight className="w-5 h-5" />
-              </WalletConnectButton>
+              {isConnected ? (
+                <Link 
+                  href="/dashboard"
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                >
+                  <ArrowRight className="w-5 h-5" />
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <WalletConnectButton className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2">
+                  Get Started <ArrowRight className="w-5 h-5" />
+                </WalletConnectButton>
+              )}
               <button className="border border-white/20 hover:border-white/40 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 flex items-center gap-2">
                 <Play className="w-5 h-5" /> View Demo
               </button>

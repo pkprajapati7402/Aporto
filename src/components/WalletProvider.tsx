@@ -2,6 +2,7 @@
 
 import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { PropsWithChildren } from "react";
+import { WalletProvider as WalletContextProvider } from "../contexts/WalletContext";
 
 export function WalletProvider({ children }: PropsWithChildren) {
   return (
@@ -11,7 +12,9 @@ export function WalletProvider({ children }: PropsWithChildren) {
         console.error("Wallet connection error:", error);
       }}
     >
-      {children}
+      <WalletContextProvider>
+        {children}
+      </WalletContextProvider>
     </AptosWalletAdapterProvider>
   );
 }

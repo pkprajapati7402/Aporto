@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { useRouter } from "next/navigation";
 import { X, ArrowRight, Wallet, ExternalLink, Copy, CheckCircle } from "lucide-react";
+import { useWalletContext } from "../contexts/WalletContext";
 
 interface WalletInfo {
   name: string;
@@ -46,7 +47,8 @@ interface WalletConnectModalProps {
 }
 
 export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps) {
-  const { wallets, connect, connected, account, disconnect } = useWallet();
+  const { wallets } = useWallet();
+  const { isConnected, address, disconnect, connect, isLoading } = useWalletContext();
   const [isConnecting, setIsConnecting] = useState<string | null>(null);
   const [showAccount, setShowAccount] = useState(false);
   const [addressCopied, setAddressCopied] = useState(false);
@@ -70,7 +72,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
 
   // Redirect to dashboard when wallet is connected (only on main page)
   useEffect(() => {
-    if (connected && account && window.location.pathname === '/') {
+    if (isConnected && address && window.location.pathname === '/') {
       const timer = setTimeout(() => {
         router.push('/dashboard');
         onClose();
@@ -78,7 +80,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
       
       return () => clearTimeout(timer);
     }
-  }, [connected, account, router, onClose]);
+  }, [isConnected, address, router, onClose]);
 
   const handleConnect = async (walletName: string) => {
     try {
@@ -103,8 +105,8 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
   };
 
   const copyAddress = async () => {
-    if (account?.address) {
-      await navigator.clipboard.writeText(account.address.toString());
+    if (address) {
+      await navigator.clipboard.writeText(address);
       setAddressCopied(true);
       setTimeout(() => setAddressCopied(false), 2000);
     }
@@ -129,7 +131,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
           <div className="sticky top-0 z-[99999] bg-gradient-to-br from-gray-800 to-gray-900 border-b border-white/10 px-6 py-4 rounded-t-2xl">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold">
-                {connected ? "Wallet Connected" : "Connect Your Wallet"}
+                {isConnected ? "Wallet Connected" : "Connect Your Wallet"}
               </h3>
               <button 
                 onClick={onClose}
@@ -141,7 +143,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
           </div>
           
           <div className="p-6">
-            {connected && account ? (
+            {isConnected && address ? (
               <div className="space-y-4">
                 <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-6 text-center">
                   <div className="flex items-center justify-center gap-3 mb-4">
@@ -153,7 +155,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
                       <span className="text-gray-300 text-sm">Address:</span>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-sm font-medium">
-                          {formatAddress(account.address)}
+                          {formatAddress(address)}
                         </span>
                         <button
                           onClick={copyAddress}
@@ -169,7 +171,7 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
                     </div>
                     <div className="flex items-center justify-between p-3 bg-black/20 rounded-lg">
                       <span className="text-gray-300 text-sm">Wallet:</span>
-                      <span className="font-medium">{account.ansName || "Connected Wallet"}</span>
+                      <span className="font-medium">Connected Wallet</span>
                     </div>
                   </div>
                   <div className="mt-4 p-3 bg-purple-500/20 border border-purple-500/30 rounded-lg">
@@ -202,17 +204,9 @@ export function WalletConnectModal({ isOpen, onClose }: WalletConnectModalProps)
                       <div className="flex justify-between">
                         <span className="text-gray-400">Full Address:</span>
                         <span className="font-mono text-xs break-all max-w-48">
-                          {account.address.toString()}
+                          {address}
                         </span>
                       </div>
-                      {account.publicKey && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Public Key:</span>
-                          <span className="font-mono text-xs break-all max-w-48">
-                            {account.publicKey?.toString()}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -313,7 +307,7 @@ interface WalletButtonProps {
 }
 
 export function WalletConnectButton({ className = "", children }: WalletButtonProps) {
-  const { connected, account } = useWallet();
+  const { isConnected, address } = useWalletContext();
   const [showModal, setShowModal] = useState(false);
 
   const formatAddress = (address: string) => {
@@ -325,16 +319,16 @@ export function WalletConnectButton({ className = "", children }: WalletButtonPr
       <button 
         onClick={() => setShowModal(true)}
         className={`${className} ${
-          connected
+          isConnected
             ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 hover:from-green-500/30 hover:to-emerald-500/30"
             : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
         } px-6 py-2 rounded-full font-medium transition-all duration-300 transform hover:scale-105 flex items-center gap-2`}
       >
         <Wallet className="w-4 h-4" />
-        {connected && account ? (
+        {isConnected && address ? (
           <>
             <span className="hidden sm:inline">
-              {formatAddress(account.address.toString())}
+              {formatAddress(address)}
             </span>
             <span className="sm:hidden">
               Connected
