@@ -58,6 +58,7 @@ export default function AdvancedDashboard() {
   const [activeTimeframe, setActiveTimeframe] = useState('7d');
   const [personalityRevealed, setPersonalityRevealed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [shareToastVisible, setShareToastVisible] = useState(false);
 
   // Redirect if wallet is not connected
   useEffect(() => {
@@ -250,6 +251,36 @@ export default function AdvancedDashboard() {
     }
   };
 
+  const handleShareProfile = () => {
+    const data = getRealOrMockData();
+    
+    // Create a compelling tweet text with user's personality and stats
+    const personalityName = data.personality.type.replace(" (Preview)", "");
+    const tweetText = `🚀 Just discovered my crypto personality on WalletPersona! 
+
+${data.personality.emoji} I'm a ${personalityName}
+💰 Portfolio: ${data.stats.portfolioValue}
+📊 ${data.stats.totalTransactions} transactions across ${data.stats.activeProtocols} protocols
+🎯 Risk Score: ${mockData.stats.riskScore}/10
+
+Mint your on-chain personality on #Aptos blockchain! 
+
+#CryptoPersonality #Aptos #DeFi #Web3 #OnChain`;
+
+    // Encode the tweet text for URL
+    const encodedTweet = encodeURIComponent(tweetText);
+    
+    // Create Twitter intent URL
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedTweet}`;
+    
+    // Show toast notification
+    setShareToastVisible(true);
+    setTimeout(() => setShareToastVisible(false), 3000);
+    
+    // Open Twitter in a new tab
+    window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+  };
+
   // Show loading screen while checking wallet connection
   if (isLoading) {
     return (
@@ -278,6 +309,19 @@ export default function AdvancedDashboard() {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: rgba(34, 197, 218, 0.7);
+        }
+        @keyframes slide-in-right {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out forwards;
         }
       `}</style>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
@@ -410,6 +454,14 @@ export default function AdvancedDashboard() {
                         Update Profile
                       </>
                     )}
+                  </button>
+                  
+                  <button
+                    onClick={handleShareProfile}
+                    className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/50 px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 text-sm font-medium hover:scale-105 transform"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    Share on Twitter
                   </button>
                   
                   <a
@@ -1029,7 +1081,10 @@ export default function AdvancedDashboard() {
                 View on Explorer
               </a>
               
-              <button className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/50 px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 text-xs font-medium">
+              <button 
+                onClick={handleShareProfile}
+                className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 border border-green-500/50 px-4 py-2 rounded-xl transition-all duration-300 flex items-center gap-2 text-xs font-medium hover:scale-105 transform"
+              >
                 <Share2 className="w-3 h-3" />
                 Share Profile
               </button>
@@ -1063,6 +1118,22 @@ export default function AdvancedDashboard() {
           <p className="text-xs">🚀 Your crypto journey is unique - keep building, keep growing!</p>
         </div>
       </div>
+      
+      {/* Share Toast Notification */}
+      {shareToastVisible && (
+        <div className="fixed top-4 right-4 z-50 bg-gradient-to-r from-green-500/90 to-emerald-500/90 backdrop-blur-xl border border-green-500/30 rounded-xl p-4 flex items-center gap-3 animate-slide-in-right shadow-lg shadow-green-500/25">
+          <div className="flex items-center gap-2">
+            <Share2 className="w-5 h-5 text-white" />
+            <span className="text-white font-medium">Twitter opened! Ready to share your crypto personality 🚀</span>
+          </div>
+          <button 
+            onClick={() => setShareToastVisible(false)}
+            className="text-white/80 hover:text-white ml-2"
+          >
+            ×
+          </button>
+        </div>
+      )}
       </div>
     </>
   );
