@@ -33,12 +33,14 @@ import {
 } from 'lucide-react';
 import { WalletConnectButton } from '../components/WalletConnect';
 import { useWalletContext } from '../contexts/WalletContext';
+import { useRouter } from 'next/navigation';
 
 const EnhancedModernLanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentFeature, setCurrentFeature] = useState(0);
-  const [isVisible, setIsVisible] = useState({});
-  const { isConnected } = useWalletContext();
+  const [isVisible, setIsVisible] = useState<Record<string, boolean>>({});
+  const { isConnected, address } = useWalletContext();
+  const router = useRouter();
 
   // Enhanced features with more detail
   const features = [
@@ -176,6 +178,17 @@ const EnhancedModernLanding = () => {
     return () => clearInterval(interval);
   }, [features.length]);
 
+  // Navigate to dashboard when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      const timer = setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000); // Give user time to see the connection success
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, address, router]);
+
   return (
     <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white min-h-screen overflow-x-hidden">
       {/* Enhanced Navigation */}
@@ -285,9 +298,9 @@ const EnhancedModernLanding = () => {
                   href="/dashboard"
                   className="group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 px-10 py-5 rounded-full font-bold text-xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-green-500/25 flex items-center gap-3"
                 >
-                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+                  <CheckCircle className="w-6 h-6 text-green-300" />
                   Enter Dashboard
-                  <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
+                  <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                 </Link>
               ) : (
                 <WalletConnectButton className="group bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 px-10 py-5 rounded-full font-bold text-xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-purple-500/25 flex items-center gap-3">
@@ -865,7 +878,7 @@ const EnhancedModernLanding = () => {
                 href="/dashboard"
                 className="group bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 px-12 py-6 rounded-full font-bold text-2xl transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-green-500/25 flex items-center gap-4"
               >
-                <Sparkles className="w-8 h-8 group-hover:rotate-12 transition-transform" />
+                <CheckCircle className="w-8 h-8 text-green-300" />
                 Enter Your Dashboard
                 <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
               </Link>

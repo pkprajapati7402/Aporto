@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { aptosProfileService, WalletProfile, ProfileData, Achievement } from '../services/aptosProfileService';

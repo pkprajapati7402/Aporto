@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@aptos-labs/wallet-adapter-react';
 import { realWalletAnalyticsService, RecentTransaction } from '../services/realWalletAnalytics';
